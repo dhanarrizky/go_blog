@@ -8,17 +8,19 @@ import (
 
 type User struct {
 	gorm.Model
-	UserName   string `gorm:"not null;unique; size:25"`
-	Email      string `gorm:"not null;unique;" validate:"email"`
-	Password   string `gorm:"not null;size:10"`
-	Phone      int    `gorm:"not null;unique"`
-	FirstName  string `gorm:"not null;size:100"`
-	LastName   string `gorm:"not null;size:100"`
-	Gender     bool
-	BirthPlace string    `gorm:"not null"`
-	BirthDate  time.Time `gorm:"not null"`
-	Address    string
-	Posts      []Post `gorm:"foreignKey:UserID"`
+	UserName     string `gorm:"not null;unique; size:25"`
+	Email        string `gorm:"not null;unique;" validate:"email"`
+	Phone        int    `gorm:"not null;unique"`
+	Password     string `gorm:"not null;size:10"`
+	FirstName    string `gorm:"not null;size:100"`
+	LastName     string `gorm:"not null;size:100"`
+	Gender       bool
+	Token        *string   `gorm:"not null"`
+	RefreshToken *string   `gorm:"not null"`
+	BirthPlace   string    `gorm:"not null"`
+	BirthDate    time.Time `gorm:"not null"`
+	Address      string
+	Posts        []Post `gorm:"foreignKey:UserID"`
 }
 
 type Categories struct {
