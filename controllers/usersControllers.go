@@ -85,7 +85,7 @@ func UpdateUserControllers() gin.HandlerFunc {
 		var user models.User
 		_, cancel := context.WithTimeout(context.Background(), 50*time.Second)
 		userId := c.Param("id")
-		err := DB.First(&user, userId)
+		err := DB.Find(&user, userId)
 		if err.Error != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"message": "user not found", "error": err.Error.Error()})
 			return

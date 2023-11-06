@@ -1,82 +1,125 @@
 package controllers
 
 import (
-	"fmt"
+	"context"
+	"net/http"
+	"time"
 
 	"github.com/dhanarrizky/go-blog/models"
+	"github.com/gin-gonic/gin"
 )
 
-func CreateCategoryControllers() {
-	var Categories models.Categories
+func CreateCategoryControllers() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var category models.Categories
+		_, cancel := context.WithTimeout(context.Background(), 50*time.Second)
 
-	err := DB.Create(&Categories)
-	if err.Error != nil {
-		panic(err.Error.Error())
-	}
+		if err := c.Bind(&category); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
 
-	if err.RowsAffected > 0 {
-		fmt.Println("created category has been successfully")
-	}
+		db := DB.Create(&category)
+		if db.Error != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": db.Error.Error()})
+			return
+		}
 
-}
+		defer cancel()
 
-func ShowAllCategoryControllers() {
-	var Categories []models.Categories
-
-	err := DB.Find(&Categories)
-	if err.Error != nil {
-		panic(err.Error.Error())
-	}
-
-	// for i, val := range Categories {
-	// 	fmt.Println(i, " => ")
-	// 	fmt.Println("\t Name of category: ", val.Name)
-	// }
-}
-
-func ShowDetaileCategoryControllers(id int) {
-	var Categories models.Categories
-
-	err := DB.Find(&Categories, id)
-	if err.Error != nil {
-		panic(err.Error.Error())
-	}
-
-	// fmt.Println("category name : ", Categories.Name)
-}
-
-func UpdateCategoryControllers(id int) {
-	var Categories models.Categories
-
-	err := DB.Find(&Categories, id)
-	if err.Error != nil {
-		panic(err.Error.Error())
-	}
-
-	err = DB.Save(&Categories)
-	if err.Error != nil {
-		panic(err.Error.Error())
-	}
-
-	if err.RowsAffected > 0 {
-		fmt.Println("updated category has been successfully")
+		if db.RowsAffected > 0 {
+			c.JSON(http.StatusOK, category)
+		}
 	}
 }
 
-func DeleteCategoryControllers(id int) {
-	var Categories models.Categories
+func ShowAllCategoryControllers() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var category models.Categories
+		_, cancel := context.WithTimeout(context.Background(), 50*time.Second)
 
-	err := DB.Find(&Categories, id)
-	if err.Error != nil {
-		panic(err.Error.Error())
-	}
+		categories := map[string]interface{}{}
+		db := DB.Model(&category).First(&categories)
+		if db.Error != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": db.Error.Error()})
+			return
+		}
 
-	err = DB.Delete(&Categories)
-	if err.Error != nil {
-		panic(err.Error.Error())
-	}
+		defer cancel()
+		count := len(categories)
+		groupJson := gin.H{
+			"count":      count,
+			"categories": categories,
+		}
 
-	if err.RowsAffected > 0 {
-		fmt.Println("deleted category has been successfully")
+		c.JSON(http.StatusOK, groupJson)
+
 	}
+}
+
+func ShowDetaileCategoryControllers() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var category models.Categories
+		_, cancel := context.WithTimeout(context.Background(), 50*time.Second)
+
+		ctgId := c.Param("id")
+		db := DB.Find(&category, ctgId)
+
+		if db.Error != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": db.Error.Error()})
+			return
+		}
+
+		defer cancel()
+		c.JSON(http.StatusOK, category)
+	}
+}
+
+func UpdateCategoryControllers() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var category models.Categories
+		_, cancel := context.WithTimeout(context.Background(), 50*time.Second)
+
+		ctgId := c.Param("id")
+		db := DB.Find(&category, ctgId)
+
+		if db.Error != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": db.Error.Error()})
+		}
+
+		if err := c.Bind(&category); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		defer cancel()
+		DB.Save(&category)
+
+		if db.RowsAffected > 0 {
+			c.JSON(http.StatusOK, category)
+		}
+	}
+	// fmt.Println("updated category has been successfully")
+}
+
+func DeleteCategoryControllers() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var category models.Categories
+		_, cancel := context.WithTimeout(context.Background(), 50*time.Second)
+
+		ctgId := c.Param("id")
+		db := DB.Delete(&category, ctgId)
+
+		if db.Error != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": db.Error.Error()})
+			return
+		}
+
+		defer cancel()
+		if db.RowsAffected > 0 {
+			c.JSON(http.StatusOK, gin.H{"message": "deleted category has been successfully"})
+		}
+
+	}
+	// fmt.Println("deleted category has been successfully")
 }
