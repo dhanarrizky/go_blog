@@ -1,16 +1,17 @@
-package usersroutes
+package routes
 
 import (
+	"github.com/dhanarrizky/go-blog/controllers"
 	"github.com/dhanarrizky/go-blog/middleware"
 	"github.com/gin-gonic/gin"
 )
 
 func UsersRoutes(r *gin.Engine) {
 	r.Use(middleware.AuthMiddleware())
-	r.GET("users")
-	r.GET("users/:id")
-	r.PUT("users/:id")    // for updatred the account
-	r.DELETE("users/:id") // for delete the account
+	r.GET("users", controllers.ShowAllUserControllers())
+	r.GET("users/:id", controllers.ShowUserDetaileControllers())
+	r.PUT("users/:id", controllers.UpdateUserControllers())    // for updatred the account
+	r.DELETE("users/:id", controllers.DeleteUserControllers()) // for delete the account
 	CategoryRoutes(r)
 	PostRoutes(r)
 }
@@ -18,8 +19,8 @@ func UsersRoutes(r *gin.Engine) {
 func CategoryRoutes(r *gin.Engine) {
 	r.GET("users/category")
 	r.POST("users/category")
-	r.PUT("users/category")
-	r.DELETE("users/category")
+	r.PUT("users/category/:id")
+	r.DELETE("users/category/:id")
 }
 
 func PostRoutes(r *gin.Engine) {

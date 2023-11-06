@@ -92,7 +92,8 @@ func UsersSignup() gin.HandlerFunc {
 		}
 
 		if db.RowsAffected > 0 {
-			c.JSON(http.StatusOK, gin.H{"message": "users has been created successfully"})
+			c.JSON(http.StatusOK, user)
+			// gin.H{"message": "users has been created successfully"}
 		}
 	}
 }

@@ -9,8 +9,6 @@ import (
 func CreateCategoryControllers() {
 	var Categories models.Categories
 
-	// Categories.Name = "travelling"
-
 	err := DB.Create(&Categories)
 	if err.Error != nil {
 		panic(err.Error.Error())

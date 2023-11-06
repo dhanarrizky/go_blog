@@ -8,7 +8,6 @@ import (
 
 	"github.com/dhanarrizky/go-blog/database"
 	"github.com/dhanarrizky/go-blog/routes"
-	usersroutes "github.com/dhanarrizky/go-blog/routes/usersRoutes"
 	"github.com/gin-gonic/gin"
 )
 
@@ -24,8 +23,8 @@ func main() {
 	route := gin.Default()
 	route.Use(gin.Logger())
 	routes.GuestRoutes(route)
-	usersroutes.UsersAuthencticationRoutes(route)
-	usersroutes.UsersRoutes(route)
+	routes.UsersAuthencticationRoutes(route)
+	routes.UsersRoutes(route)
 
 	route.Run(":" + port)
 }
