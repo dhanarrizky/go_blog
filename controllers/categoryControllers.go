@@ -9,8 +9,6 @@ import (
 func CreateCategoryControllers() {
 	var Categories models.Categories
 
-	Categories.Name = "travelling"
-
 	err := DB.Create(&Categories)
 	if err.Error != nil {
 		panic(err.Error.Error())
@@ -30,10 +28,10 @@ func ShowAllCategoryControllers() {
 		panic(err.Error.Error())
 	}
 
-	for i, val := range Categories {
-		fmt.Println(i, " => ")
-		fmt.Println("\t Name of category: ", val.Name)
-	}
+	// for i, val := range Categories {
+	// 	fmt.Println(i, " => ")
+	// 	fmt.Println("\t Name of category: ", val.Name)
+	// }
 }
 
 func ShowDetaileCategoryControllers(id int) {
@@ -44,7 +42,7 @@ func ShowDetaileCategoryControllers(id int) {
 		panic(err.Error.Error())
 	}
 
-	fmt.Println("category name : ", Categories.Name)
+	// fmt.Println("category name : ", Categories.Name)
 }
 
 func UpdateCategoryControllers(id int) {
