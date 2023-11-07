@@ -3,6 +3,7 @@ package helper
 import (
 	"fmt"
 	"log"
+	"os"
 	"strconv"
 	"time"
 
@@ -11,7 +12,7 @@ import (
 	"github.com/dhanarrizky/go-blog/models"
 )
 
-var SECRET_KEY = "thisIsSecretKey"
+var SECRET_KEY string = os.Getenv("SECRET_KEY")
 
 type SignedDetailes struct {
 	UserName  string
@@ -40,13 +41,15 @@ func GenerateJwtToken(username, email, firstname, lastname, uid string) (string,
 		},
 	}
 
-	token, err := jwt.NewWithClaims(jwt.SigningMethodES256, claims).SignedString([]byte(SECRET_KEY))
+	token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString([]byte(SECRET_KEY))
 	if err != nil {
-		log.Panic(err)
+		log.Println("error here")
+		log.Println(err)
 	}
-	refreshToken, err := jwt.NewWithClaims(jwt.SigningMethodES256, refreshClaims).SignedString([]byte(SECRET_KEY))
+	refreshToken, err := jwt.NewWithClaims(jwt.SigningMethodHS256, refreshClaims).SignedString([]byte(SECRET_KEY))
 	if err != nil {
-		log.Panic(err)
+		log.Println("and error here")
+		log.Println(err)
 	}
 
 	return token, refreshToken, err
@@ -68,7 +71,7 @@ func UpdateJwtToken(signedToken, refreshSignedToken, uid string) {
 	DB.Save(&users)
 
 	if db.Error != nil {
-		log.Panic(db.Error.Error())
+		log.Println(db.Error.Error())
 		return
 	}
 

@@ -57,7 +57,7 @@ func ShowAllPostControllers() gin.HandlerFunc {
 	}
 }
 
-func ShowDetailePostControllers(id int) gin.HandlerFunc {
+func ShowDetailePostControllers() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		_, cancel := context.WithTimeout(context.Background(), 50*time.Second)
 		var post models.Post
@@ -74,7 +74,7 @@ func ShowDetailePostControllers(id int) gin.HandlerFunc {
 	}
 }
 
-func UpdatePostControllers(id int) gin.HandlerFunc {
+func UpdatePostControllers() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		_, cancel := context.WithTimeout(context.Background(), 50*time.Second)
 		var post models.Post
@@ -100,7 +100,7 @@ func UpdatePostControllers(id int) gin.HandlerFunc {
 	}
 }
 
-func DeletePostControllers(id int) gin.HandlerFunc {
+func DeletePostControllers() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		_, cancel := context.WithTimeout(context.Background(), 50*time.Second)
 		var post models.Post

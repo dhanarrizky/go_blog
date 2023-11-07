@@ -17,22 +17,23 @@ import (
 
 var validate = validator.New()
 
-func hashPassword(password string) string {
-	hashPsd, err := bcrypt.GenerateFromPassword([]byte(password), 12)
+func HashPassword(password string) string {
+	hashPsd, err := bcrypt.GenerateFromPassword([]byte(password), 14)
 	if err != nil {
-		log.Panic(err.Error())
+		log.Println(err.Error())
 	}
 
 	return string(hashPsd)
 }
 
-func verifyPassword(userPassword, providerPassword string) (string, bool) {
+func verifyPassword(providerPassword, userPassword string) (string, bool) {
 	err := bcrypt.CompareHashAndPassword([]byte(providerPassword), []byte(userPassword))
 	check := true
 	msg := ""
 
 	if err != nil {
-		msg = fmt.Sprintf("email of password is incorrect")
+		log.Println(err.Error())
+		msg = fmt.Sprintf("password is incorrect")
 		check = false
 	}
 
@@ -50,6 +51,14 @@ func UsersSignup() gin.HandlerFunc {
 			return
 		}
 
+		date, err := time.Parse("2006-01-02", user.Birth)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		user.BirthDate = date
+
 		validateErr := validate.Struct(user)
 		if validateErr != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": validateErr.Error()})
@@ -57,7 +66,7 @@ func UsersSignup() gin.HandlerFunc {
 		}
 
 		var existUserUserName models.User
-		if err := DB.Where("username = ?", user.UserName).First(&existUserUserName).Error; err == nil {
+		if err := DB.Where("user_name = ?", user.UserName).First(&existUserUserName).Error; err == nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "username already exists"})
 			return
 		}
@@ -84,6 +93,8 @@ func UsersSignup() gin.HandlerFunc {
 
 		user.Token = &token
 		user.RefreshToken = &refreshToken
+		password := HashPassword(*&user.Password)
+		user.Password = password
 
 		db := DB.Create(&user)
 		if db.Error != nil {
@@ -111,15 +122,17 @@ func UsersLogin() gin.HandlerFunc {
 		}
 
 		var existUserUserName models.User
-		if err := DB.Where("username = ?", user.UserName).First(&existUserUserName).Error; err != nil {
+		if err := DB.Where("user_name = ?", user.UserName).Find(&existUserUserName).Error; err != nil {
+			fmt.Println(existUserUserName)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "username not found"})
 			return
 		}
 
-		msg, isValidPassword := verifyPassword(user.Password, existUserUserName.Password)
+		msg, isValidPassword := verifyPassword(*&existUserUserName.Password, *&user.Password)
 
 		if isValidPassword != true {
 			c.JSON(http.StatusInternalServerError, gin.H{"message": msg})
+			return
 		}
 
 		strId := strconv.FormatUint(uint64(*&existUserUserName.ID), 10)
