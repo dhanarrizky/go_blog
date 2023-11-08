@@ -17,15 +17,17 @@ func UsersRoutes(r *gin.Engine) {
 }
 
 func CategoryRoutes(r *gin.Engine) {
-	r.GET("users/category", controllers.ShowAllCategoryControllers())
 	r.POST("users/category", controllers.CreateCategoryControllers())
+	r.GET("users/category", controllers.ShowAllCategoryControllers())
+	r.GET("users/category/:id", controllers.ShowDetaileCategoryControllers())
 	r.PUT("users/category/:id", controllers.UpdateCategoryControllers())
 	r.DELETE("users/category/:id", controllers.DeleteCategoryControllers())
 }
 
 func PostRoutes(r *gin.Engine) {
-	r.GET("users/Post", controllers.ShowAllPostControllers())
-	r.POST("users/Post", controllers.CreatePostControllers())
-	r.PUT("users/Post/:id", controllers.UpdatePostControllers())
-	r.DELETE("users/Post/:id", controllers.DeletePostControllers())
+	r.POST("users/post", controllers.CreatePostControllers())
+	r.GET("users/post", controllers.ShowAllPostControllers())
+	r.GET("users/post/:id", controllers.ShowAllPostControllers())
+	r.PUT("users/post/:id", controllers.UpdatePostControllers())
+	r.DELETE("users/post/:id", controllers.DeletePostControllers())
 }

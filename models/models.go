@@ -3,25 +3,27 @@ package models
 import (
 	"time"
 
+	_ "github.com/go-playground/validator/v10"
 	"gorm.io/gorm"
 )
 
 type User struct {
 	gorm.Model
-	UserName     string    `gorm:"not null;unique; size:25" json:"user_name"`
-	Email        string    `gorm:"not null;unique;" validate:"email" json:"email"`
-	Phone        int       `gorm:"not null;unique;" json:"phone"`
-	Password     string    `gorm:"not null;" json:"password"`
-	FirstName    string    `gorm:"not null;type:varchar(100);" json:"rirst_name"`
+	UserName     string    `gorm:"not null;unique; size:25" json:"user_name" validate:"required" `
+	Email        string    `gorm:"not null;unique;" json:"email" validate:"email,required" `
+	Phone        int       `gorm:"not null;unique;" json:"phone" validate:"required"`
+	Password     string    `gorm:"not null;" json:"password" validate:"required"`
+	FirstName    string    `gorm:"not null;type:varchar(100);" json:"rirst_name" validate:"required"`
 	LastName     string    `gorm:"not null;type:varchar(100);" json:"last_name"`
 	Gender       bool      `json:"gender"`
 	Token        *string   `gorm:"not null;" json:"token"`
 	RefreshToken *string   `gorm:"not null;" json:"refresh_token"`
-	BirthPlace   string    `gorm:"not null;" json:"birth_place"`
-	Birth        string    `gorm:"not null;" json:"birthdate"`
+	BirthPlace   string    `gorm:"not null;" json:"birth_place" validate:"required"`
+	Birth        string    `gorm:"not null;" json:"birthdate" validate:"required"`
 	BirthDate    time.Time `gorm:"not null;" json:"birth_date"`
 	Address      string    `json:"address"`
 	Posts        []Post    `gorm:"foreignKey:UserID;" json:"posts"`
+	Role         string    `gorm:"not null;size:8;" json:"role" validate:"eq=ADMIN|eq=USER"`
 }
 
 type Categories struct {
@@ -39,3 +41,5 @@ type Post struct {
 	Category    Categories `gorm:"foreignKey:CategoryID;" json:"category"`
 	User        User       `gorm:"foreignKey:UserID;" json:"user"`
 }
+
+// almost all of post is non

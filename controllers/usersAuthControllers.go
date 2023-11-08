@@ -46,6 +46,7 @@ func UsersSignup() gin.HandlerFunc {
 		var user models.User
 		defer cancel()
 
+		user.Role = "USER"
 		if err := c.BindJSON(&user); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
@@ -84,7 +85,7 @@ func UsersSignup() gin.HandlerFunc {
 		}
 
 		strId := strconv.FormatUint(uint64(*&user.ID), 10)
-		token, refreshToken, err := helper.GenerateJwtToken(*&user.UserName, *&user.Email, *&user.FirstName, *&user.LastName, strId)
+		token, refreshToken, err := helper.GenerateJwtToken(*&user.UserName, *&user.Email, *&user.FirstName, *&user.LastName, strId, *&user.Role)
 
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -136,7 +137,7 @@ func UsersLogin() gin.HandlerFunc {
 		}
 
 		strId := strconv.FormatUint(uint64(*&existUserUserName.ID), 10)
-		token, refreshToken, err := helper.GenerateJwtToken(*&existUserUserName.UserName, *&existUserUserName.Email, *&existUserUserName.FirstName, *&existUserUserName.LastName, strId)
+		token, refreshToken, err := helper.GenerateJwtToken(*&existUserUserName.UserName, *&existUserUserName.Email, *&existUserUserName.FirstName, *&existUserUserName.LastName, strId, *&existUserUserName.Role)
 		helper.UpdateJwtToken(token, refreshToken, strId)
 
 		if err != nil {
