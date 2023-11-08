@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/dhanarrizky/go-blog/helper"
 	"github.com/dhanarrizky/go-blog/models"
 	"github.com/gin-gonic/gin"
 )
@@ -12,10 +13,20 @@ import (
 func CreateCategoryControllers() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var category models.Categories
+		if err := helper.AdminValidate(c, ""); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
 		_, cancel := context.WithTimeout(context.Background(), 50*time.Second)
 
 		if err := c.Bind(&category); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
+
+		var existsCategory models.Categories
+		if err := DB.Where("name = ?", existsCategory).First(&existsCategory).Error; err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"message": "category already exists"})
 			return
 		}
 
@@ -35,11 +46,10 @@ func CreateCategoryControllers() gin.HandlerFunc {
 
 func ShowAllCategoryControllers() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var category models.Categories
+		var categories []models.Categories
 		_, cancel := context.WithTimeout(context.Background(), 50*time.Second)
 
-		categories := map[string]interface{}{}
-		db := DB.Model(&category).First(&categories)
+		db := DB.Find(&categories)
 		if db.Error != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": db.Error.Error()})
 			return
@@ -60,6 +70,10 @@ func ShowAllCategoryControllers() gin.HandlerFunc {
 func ShowDetaileCategoryControllers() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var category models.Categories
+		if err := helper.AdminValidate(c, ""); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
 		_, cancel := context.WithTimeout(context.Background(), 50*time.Second)
 
 		ctgId := c.Param("id")
@@ -78,6 +92,10 @@ func ShowDetaileCategoryControllers() gin.HandlerFunc {
 func UpdateCategoryControllers() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var category models.Categories
+		if err := helper.AdminValidate(c, ""); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
 		_, cancel := context.WithTimeout(context.Background(), 50*time.Second)
 
 		ctgId := c.Param("id")
@@ -105,6 +123,10 @@ func UpdateCategoryControllers() gin.HandlerFunc {
 func DeleteCategoryControllers() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var category models.Categories
+		if err := helper.AdminValidate(c, ""); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			return
+		}
 		_, cancel := context.WithTimeout(context.Background(), 50*time.Second)
 
 		ctgId := c.Param("id")

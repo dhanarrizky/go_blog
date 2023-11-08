@@ -20,16 +20,18 @@ type SignedDetailes struct {
 	FirstName string
 	LastName  string
 	Uid       string
+	Role      string
 	jwt.StandardClaims
 }
 
-func GenerateJwtToken(username, email, firstname, lastname, uid string) (string, string, error) {
+func GenerateJwtToken(username, email, firstname, lastname, uid, role string) (string, string, error) {
 	claims := &SignedDetailes{
 		UserName:  username,
 		Email:     email,
 		FirstName: firstname,
 		LastName:  lastname,
 		Uid:       uid,
+		Role:      role,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: time.Now().Local().Add(time.Hour * time.Duration(3)).Unix(),
 		},
