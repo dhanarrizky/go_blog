@@ -14,32 +14,6 @@ import (
 
 var DB = database.ConDB()
 
-// func CreateUsersControllers() gin.HandlerFunc {
-// 	return func(c *gin.Context) {
-// 		var user models.User
-// 		_, cancel := context.WithTimeout(context.Background(), 50*time.Second)
-
-// 		if err := c.Bind(&user); err != nil {
-// 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-// 			return
-// 		}
-
-// 		result := DB.Create(&user)
-// 		if result.Error != nil {
-// 			// panic(result.Error.Error())
-// 			c.JSON(http.StatusInternalServerError, gin.H{"error": result.Error.Error()})
-// 			return
-// 		}
-
-// 		defer cancel()
-
-// 		if result.RowsAffected > 0 {
-// 			// log.Println("Created data has been successfully")
-// 			c.JSON(http.StatusOK, user)
-// 		}
-// 	}
-// }
-
 func ShowAllUserControllers() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var users []models.User

@@ -3,6 +3,7 @@ package controllers
 import (
 	"context"
 	"net/http"
+	_ "path/filepath"
 	"strconv"
 	"time"
 
@@ -18,7 +19,7 @@ func CreatePostControllers() gin.HandlerFunc {
 		var users models.User
 
 		userId := c.GetString("uId")
-		_, cancel := context.WithTimeout(context.Background(), 50*time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), 50*time.Second)
 		defer cancel()
 
 		if err := c.Bind(&post); err != nil {
@@ -26,13 +27,13 @@ func CreatePostControllers() gin.HandlerFunc {
 			return
 		}
 
-		dbUser := DB.Find(&users, userId)
+		dbUser := DB.WithContext(ctx).Find(&users, userId)
 		if dbUser.Error != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": dbUser.Error.Error()})
 			return
 		}
 
-		dbCategory := DB.Find(&categories, post.CategoryID)
+		dbCategory := DB.WithContext(ctx).Find(&categories, post.CategoryID)
 		if dbCategory.Error != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": dbUser.Error.Error()})
 			return
@@ -47,14 +48,14 @@ func CreatePostControllers() gin.HandlerFunc {
 		post.UserID = uint(intUserId)
 		post.User = users
 		post.Category = categories
-		db := DB.Create(&post)
+		db := DB.WithContext(ctx).Create(&post)
 		if db.Error != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": db.Error.Error()})
 			return
 		}
 
 		users.Posts = append(users.Posts, post)
-		dbUser.Save(users)
+		dbUser.WithContext(ctx).Save(users)
 		if dbUser.Error != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": dbUser.Error.Error()})
 			return
@@ -70,10 +71,10 @@ func CreatePostControllers() gin.HandlerFunc {
 func ShowAllPostControllers() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var post []models.Post
-		_, cancel := context.WithTimeout(context.Background(), 50*time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), 50*time.Second)
 		defer cancel()
 
-		db := DB.Preload("Category").Find(&post)
+		db := DB.WithContext(ctx).Preload("Category").Find(&post)
 		if db.Error != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": db.Error.Error()})
 			return
@@ -92,12 +93,12 @@ func ShowAllPostControllers() gin.HandlerFunc {
 func ShowDetailePostControllers() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var post models.Post
-		_, cancel := context.WithTimeout(context.Background(), 50*time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), 50*time.Second)
 		defer cancel()
 
 		postId := c.Param("id")
 
-		db := DB.Preload("Category").Preload("User").Find(&post, postId)
+		db := DB.WithContext(ctx).Preload("Category").Preload("User").Find(&post, postId)
 		if db.Error != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": db.Error.Error()})
 			return
@@ -111,11 +112,11 @@ func UpdatePostControllers() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var post models.Post
 
-		_, cancel := context.WithTimeout(context.Background(), 50*time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), 50*time.Second)
 		defer cancel()
 
 		postId := c.Param("id")
-		db := DB.Find(&post, postId)
+		db := DB.WithContext(ctx).Find(&post, postId)
 		if db.Error != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": db.Error.Error()})
 			return
@@ -127,7 +128,7 @@ func UpdatePostControllers() gin.HandlerFunc {
 			return
 		}
 
-		db = DB.Save(&post)
+		db = DB.WithContext(ctx).Save(&post)
 		if db.Error != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": db.Error.Error()})
 			return
@@ -143,11 +144,11 @@ func UpdatePostControllers() gin.HandlerFunc {
 func DeletePostControllers() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var post models.Post
-		_, cancel := context.WithTimeout(context.Background(), 50*time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), 50*time.Second)
 		defer cancel()
 
 		postId := c.Param("id")
-		db := DB.Find(&post, postId)
+		db := DB.WithContext(ctx).Find(&post, postId)
 		if db.Error != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": db.Error.Error()})
 			return
@@ -159,7 +160,7 @@ func DeletePostControllers() gin.HandlerFunc {
 			return
 		}
 
-		db = DB.Delete(&post)
+		db = DB.WithContext(ctx).Delete(&post)
 		if db.Error != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": db.Error.Error()})
 			return
