@@ -43,7 +43,7 @@ func verifyPassword(providerPassword, userPassword string) (string, bool) {
 func UsersSignup() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var user models.User
-		_, cancel := context.WithTimeout(context.Background(), 50*time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), 50*time.Second)
 		defer cancel()
 
 		user.Role = "USER"
@@ -67,19 +67,19 @@ func UsersSignup() gin.HandlerFunc {
 		}
 
 		var existUserUserName models.User
-		if err := DB.Where("user_name = ?", user.UserName).First(&existUserUserName).Error; err == nil {
+		if err := DB.WithContext(ctx).Where("user_name = ?", user.UserName).First(&existUserUserName).Error; err == nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "username already exists"})
 			return
 		}
 
 		var existUserEmail models.User
-		if err := DB.Where("email = ?", user.Email).First(&existUserEmail).Error; err == nil {
+		if err := DB.WithContext(ctx).Where("email = ?", user.Email).First(&existUserEmail).Error; err == nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "email already exists"})
 			return
 		}
 
 		var existUserPhone models.User
-		if err := DB.Where("phone = ?", user.Phone).First(&existUserPhone).Error; err == nil {
+		if err := DB.WithContext(ctx).Where("phone = ?", user.Phone).First(&existUserPhone).Error; err == nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "phone number already exists"})
 			return
 		}
@@ -97,7 +97,7 @@ func UsersSignup() gin.HandlerFunc {
 		password := HashPassword(*&user.Password)
 		user.Password = password
 
-		db := DB.Create(&user)
+		db := DB.WithContext(ctx).Create(&user)
 		if db.Error != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": db.Error.Error()})
 			return
@@ -113,7 +113,7 @@ func UsersSignup() gin.HandlerFunc {
 func UsersLogin() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var user models.User
-		_, cancel := context.WithTimeout(context.Background(), 50*time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), 50*time.Second)
 		// var findUser models.User
 
 		defer cancel()
@@ -123,7 +123,7 @@ func UsersLogin() gin.HandlerFunc {
 		}
 
 		var existUserUserName models.User
-		if err := DB.Where("user_name = ?", user.UserName).First(&existUserUserName).Error; err != nil {
+		if err := DB.WithContext(ctx).Where("user_name = ?", user.UserName).First(&existUserUserName).Error; err != nil {
 			fmt.Println(existUserUserName)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "username not found"})
 			return

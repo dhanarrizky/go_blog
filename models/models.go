@@ -31,15 +31,21 @@ type Categories struct {
 	Name string `gorm:"not null;type:varchar(100)" json:"name" validate:"required"`
 }
 
+// type ImgFile struct {
+// 	ImgFile *multipart.FileHeader
+// }
+
 type Post struct {
 	gorm.Model
-	Title       string     `gorm:"not null;type:varchar(255);" json:"title" validate:"required"`
+	Title string `gorm:"not null;type:varchar(255);" json:"title" validate:"required"`
+	// Img   multipart.FileHeader `json:"img"`
 	Img         string     `json:"img"`
 	Description string     `json:"description" validate:"required"`
 	UserID      uint       `gorm:"not null;" json:"user_id"`
 	CategoryID  uint       `gorm:"not null;" json:"category_id"`
 	Category    Categories `gorm:"foreignKey:CategoryID;" json:"category"`
 	User        User       `gorm:"foreignKey:UserID;" json:"user"`
+	// Images      ImgFile
 }
 
 // almost all of post is non

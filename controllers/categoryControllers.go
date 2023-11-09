@@ -17,7 +17,7 @@ func CreateCategoryControllers() gin.HandlerFunc {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
-		_, cancel := context.WithTimeout(context.Background(), 50*time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), 50*time.Second)
 		defer cancel()
 
 		if err := c.Bind(&category); err != nil {
@@ -26,12 +26,12 @@ func CreateCategoryControllers() gin.HandlerFunc {
 		}
 
 		var existsCategory models.Categories
-		if err := DB.Where("name = ?", category.Name).First(&existsCategory).Error; err == nil {
+		if err := DB.WithContext(ctx).Where("name = ?", category.Name).First(&existsCategory).Error; err == nil {
 			c.JSON(http.StatusBadRequest, gin.H{"message": "category already exists"})
 			return
 		}
 
-		db := DB.Create(&category)
+		db := DB.WithContext(ctx).Create(&category)
 		if db.Error != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": db.Error.Error()})
 			return
@@ -46,10 +46,10 @@ func CreateCategoryControllers() gin.HandlerFunc {
 func ShowAllCategoryControllers() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var categories []models.Categories
-		_, cancel := context.WithTimeout(context.Background(), 50*time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), 50*time.Second)
 		defer cancel()
 
-		db := DB.Find(&categories)
+		db := DB.WithContext(ctx).Find(&categories)
 		if db.Error != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": db.Error.Error()})
 			return
@@ -72,11 +72,11 @@ func ShowDetaileCategoryControllers() gin.HandlerFunc {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
-		_, cancel := context.WithTimeout(context.Background(), 50*time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), 50*time.Second)
 		defer cancel()
 
 		ctgId := c.Param("id")
-		db := DB.Find(&category, ctgId)
+		db := DB.WithContext(ctx).Find(&category, ctgId)
 
 		if db.Error != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": db.Error.Error()})
@@ -94,11 +94,11 @@ func UpdateCategoryControllers() gin.HandlerFunc {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
-		_, cancel := context.WithTimeout(context.Background(), 50*time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), 50*time.Second)
 		defer cancel()
 
 		ctgId := c.Param("id")
-		db := DB.Find(&category, ctgId)
+		db := DB.WithContext(ctx).Find(&category, ctgId)
 
 		if db.Error != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": db.Error.Error()})
@@ -125,11 +125,11 @@ func DeleteCategoryControllers() gin.HandlerFunc {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
-		_, cancel := context.WithTimeout(context.Background(), 50*time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), 50*time.Second)
 		defer cancel()
 
 		ctgId := c.Param("id")
-		db := DB.Delete(&category, ctgId)
+		db := DB.WithContext(ctx).Delete(&category, ctgId)
 
 		if db.Error != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": db.Error.Error()})
