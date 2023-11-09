@@ -28,14 +28,14 @@ type User struct {
 
 type Categories struct {
 	gorm.Model
-	Name string `gorm:"not null;type:varchar(100)" json:"name"`
+	Name string `gorm:"not null;type:varchar(100)" json:"name" validate:"required"`
 }
 
 type Post struct {
 	gorm.Model
-	Title       string     `gorm:"not null;type:varchar(255);" json:"title"`
+	Title       string     `gorm:"not null;type:varchar(255);" json:"title" validate:"required"`
 	Img         string     `json:"img"`
-	Description string     `json:"description"`
+	Description string     `json:"description" validate:"required"`
 	UserID      uint       `gorm:"not null;" json:"user_id"`
 	CategoryID  uint       `gorm:"not null;" json:"category_id"`
 	Category    Categories `gorm:"foreignKey:CategoryID;" json:"category"`

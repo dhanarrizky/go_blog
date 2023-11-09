@@ -3,6 +3,7 @@ package controllers
 import (
 	"context"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/dhanarrizky/go-blog/helper"
@@ -16,14 +17,16 @@ func CreatePostControllers() gin.HandlerFunc {
 		var categories models.Categories
 		var users models.User
 
+		userId := c.GetString("uId")
 		_, cancel := context.WithTimeout(context.Background(), 50*time.Second)
+		defer cancel()
 
 		if err := c.Bind(&post); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
 
-		dbUser := DB.Find(&users, post.UserID)
+		dbUser := DB.Find(&users, userId)
 		if dbUser.Error != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": dbUser.Error.Error()})
 			return
@@ -35,6 +38,13 @@ func CreatePostControllers() gin.HandlerFunc {
 			return
 		}
 
+		intUserId, err := strconv.Atoi(userId)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+			return
+		}
+
+		post.UserID = uint(intUserId)
 		post.User = users
 		post.Category = categories
 		db := DB.Create(&post)
@@ -50,8 +60,6 @@ func CreatePostControllers() gin.HandlerFunc {
 			return
 		}
 
-		defer cancel()
-
 		if db.RowsAffected > 0 {
 			c.JSON(http.StatusOK, post)
 			// fmt.Println("Create post has been successfully")
@@ -61,21 +69,20 @@ func CreatePostControllers() gin.HandlerFunc {
 
 func ShowAllPostControllers() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var post models.Post
+		var post []models.Post
 		_, cancel := context.WithTimeout(context.Background(), 50*time.Second)
+		defer cancel()
 
-		posts := map[string]interface{}{}
-		db := DB.Model(&post).Preload("Category").First(&posts)
+		db := DB.Preload("Category").Find(&post)
 		if db.Error != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": db.Error.Error()})
 			return
 		}
 
-		defer cancel()
-		count := len(posts)
+		count := len(post)
 		groupJson := gin.H{
 			"count": count,
-			"post":  posts,
+			"post":  post,
 		}
 
 		c.JSON(http.StatusOK, groupJson)
@@ -84,17 +91,18 @@ func ShowAllPostControllers() gin.HandlerFunc {
 
 func ShowDetailePostControllers() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		_, cancel := context.WithTimeout(context.Background(), 50*time.Second)
 		var post models.Post
+		_, cancel := context.WithTimeout(context.Background(), 50*time.Second)
+		defer cancel()
 
 		postId := c.Param("id")
+
 		db := DB.Preload("Category").Preload("User").Find(&post, postId)
 		if db.Error != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": db.Error.Error()})
 			return
 		}
 
-		defer cancel()
 		c.JSON(http.StatusOK, post)
 	}
 }
@@ -102,16 +110,20 @@ func ShowDetailePostControllers() gin.HandlerFunc {
 func UpdatePostControllers() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var post models.Post
-		if err := helper.AdminValidate(c, c.GetString("id")); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
-		}
+
 		_, cancel := context.WithTimeout(context.Background(), 50*time.Second)
+		defer cancel()
 
 		postId := c.Param("id")
 		db := DB.Find(&post, postId)
 		if db.Error != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": db.Error.Error()})
+			return
+		}
+
+		stringUserId := strconv.Itoa(int(post.UserID))
+		if err := helper.AdminValidate(c, stringUserId); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
 
@@ -121,7 +133,6 @@ func UpdatePostControllers() gin.HandlerFunc {
 			return
 		}
 
-		defer cancel()
 		if db.RowsAffected > 0 {
 			// fmt.Println("Create post has been successfully")
 			c.JSON(http.StatusOK, post)
@@ -132,16 +143,19 @@ func UpdatePostControllers() gin.HandlerFunc {
 func DeletePostControllers() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var post models.Post
-		if err := helper.AdminValidate(c, c.GetString("id")); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
-		}
 		_, cancel := context.WithTimeout(context.Background(), 50*time.Second)
+		defer cancel()
 
 		postId := c.Param("id")
 		db := DB.Find(&post, postId)
 		if db.Error != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": db.Error.Error()})
+			return
+		}
+
+		stringUserId := strconv.Itoa(int(post.UserID))
+		if err := helper.AdminValidate(c, stringUserId); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
 
@@ -151,7 +165,6 @@ func DeletePostControllers() gin.HandlerFunc {
 			return
 		}
 
-		defer cancel()
 		if db.RowsAffected > 0 {
 			// fmt.Println("delete post has been successfully")
 			c.JSON(http.StatusOK, gin.H{"message": "delete post has been successfully"})

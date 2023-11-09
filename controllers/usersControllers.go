@@ -50,6 +50,7 @@ func ShowAllUserControllers() gin.HandlerFunc {
 		}
 
 		_, cancel := context.WithTimeout(context.Background(), 50*time.Second)
+		defer cancel()
 
 		err := DB.Find(&users)
 		if err.Error != nil {
@@ -57,7 +58,6 @@ func ShowAllUserControllers() gin.HandlerFunc {
 			return
 		}
 
-		defer cancel()
 		count := len(users)
 		groupJson := gin.H{
 			"count": count,
@@ -73,6 +73,8 @@ func ShowUserDetaileControllers() gin.HandlerFunc {
 		var user models.User
 
 		_, cancel := context.WithTimeout(context.Background(), 50*time.Second)
+		defer cancel()
+
 		userId := c.Param("id")
 		err := DB.Find(&user, userId)
 
@@ -80,7 +82,7 @@ func ShowUserDetaileControllers() gin.HandlerFunc {
 			c.JSON(http.StatusInternalServerError, gin.H{"message": "user not found", "error": err.Error.Error()})
 			return
 		}
-		defer cancel()
+
 		c.JSON(http.StatusOK, user)
 	}
 }
@@ -93,6 +95,8 @@ func UpdateUserControllers() gin.HandlerFunc {
 			return
 		}
 		_, cancel := context.WithTimeout(context.Background(), 50*time.Second)
+		defer cancel()
+
 		userId := c.Param("id")
 		err := DB.Find(&user, userId)
 		if err.Error != nil {
@@ -104,7 +108,6 @@ func UpdateUserControllers() gin.HandlerFunc {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
 		}
-		defer cancel()
 
 		DB.Save(&user)
 
@@ -123,6 +126,8 @@ func DeleteUserControllers() gin.HandlerFunc {
 			return
 		}
 		_, cancel := context.WithTimeout(context.Background(), 50*time.Second)
+		defer cancel()
+
 		userId := c.Param("id")
 		err := DB.Delete(&users, userId)
 		if err.Error != nil {
@@ -130,7 +135,6 @@ func DeleteUserControllers() gin.HandlerFunc {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error.Error()})
 			return
 		}
-		defer cancel()
 
 		if err.RowsAffected > 0 {
 			// fmt.Println("deleted user has been successfully")
