@@ -2,21 +2,24 @@ package helper
 
 import (
 	"errors"
+	"log"
 
 	"github.com/gin-gonic/gin"
 )
 
 func AdminValidate(c *gin.Context, id string) error {
-	userType := c.GetString("role")
-	userId := c.GetString("uid")
+	userId := c.GetString("uId")
+	log.Println(userId)
+	roleUser := c.GetString("role")
+	log.Println(roleUser)
 
 	if id == "" {
-		if userType != "ADMIN" {
+		if roleUser != "ADMIN" {
 			err := errors.New("unathorizedto access this resource check")
 			return err
 		}
 	} else {
-		if userType != "ADMIN" || userId != id {
+		if roleUser != "ADMIN" || userId != id {
 			err := errors.New("unathorizedto access this resource check")
 			return err
 		}

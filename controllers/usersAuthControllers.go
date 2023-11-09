@@ -42,8 +42,8 @@ func verifyPassword(providerPassword, userPassword string) (string, bool) {
 
 func UsersSignup() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		_, cancel := context.WithTimeout(context.Background(), 50*time.Second)
 		var user models.User
+		_, cancel := context.WithTimeout(context.Background(), 50*time.Second)
 		defer cancel()
 
 		user.Role = "USER"
@@ -112,8 +112,8 @@ func UsersSignup() gin.HandlerFunc {
 
 func UsersLogin() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		_, cancel := context.WithTimeout(context.Background(), 50*time.Second)
 		var user models.User
+		_, cancel := context.WithTimeout(context.Background(), 50*time.Second)
 		// var findUser models.User
 
 		defer cancel()
@@ -123,7 +123,7 @@ func UsersLogin() gin.HandlerFunc {
 		}
 
 		var existUserUserName models.User
-		if err := DB.Where("user_name = ?", user.UserName).Find(&existUserUserName).Error; err != nil {
+		if err := DB.Where("user_name = ?", user.UserName).First(&existUserUserName).Error; err != nil {
 			fmt.Println(existUserUserName)
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "username not found"})
 			return
